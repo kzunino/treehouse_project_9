@@ -30,7 +30,7 @@ const authenticateUser = async (req, res, next) => {
       // from the Authorization header).
       const user = await User.findAll({
             where: {
-              emailAddress: credentials.emailAddress
+              emailAddress: credentials.name
             }
           });
 
