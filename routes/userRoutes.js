@@ -28,7 +28,8 @@ const authenticateUser = async (req, res, next) => {
       // Attempt to retrieve the user from the data store
       // by their email address (i.e. the user's "key"
       // from the Authorization header).
-      const user = await User.findAll({
+      //credentials.name comes from username field submitted
+      const user = await User.findOne({
             where: {
               emailAddress: credentials.name
             }
@@ -78,6 +79,7 @@ router.get('/users', authenticateUser, (req, res) => {
   const user = req.currentUser;
 
   res.json({
+    message: "Welcome",
     firstName: user.firstName,
     lastName: user.lastName,
   });
@@ -126,7 +128,7 @@ router.post('/users',[
     })
 
     // Set the status to 201 Created and end the response.
-    res.status(201).end();
+    res.status(201).location('/').end();
   } catch (error){
     next(error)
   }

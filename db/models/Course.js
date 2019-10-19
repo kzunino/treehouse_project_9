@@ -49,20 +49,20 @@ module.exports = (sequelize) => {
     estimatedTime: {
       type: Sequelize.STRING,
       allowNull: true,
-      validate: {
-        notEmpty: {
-          msg: 'Please provide a value for "estimatedTime"',
-        }
-      },
+      // validate: {
+      //   notEmpty: {
+      //     msg: 'Please provide a value for "estimatedTime"',
+      //   }
+      // },
     },
     materialsNeeded: {
       type: Sequelize.STRING,
       allowNull: true,
-      validate: {
-        notEmpty: {
-          msg: 'Please provide a value for "materialsNeeded"',
-        }
-      },
+      // validate: {
+      //   notEmpty: {
+      //     msg: 'Please provide a value for "materialsNeeded"',
+      //   }
+      // },
     },
   }, {
       //paranoid: true,     //enables soft deletes

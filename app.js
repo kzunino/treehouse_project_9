@@ -25,7 +25,6 @@ app.use(morgan('dev'));
 //setup api routes
 const userRoutes = require('./routes/userRoutes');
 const courseRoutes = require('./routes/courseRoutes');
-app.use(userRoutes, courseRoutes);
 app.use('/api', userRoutes, courseRoutes);
 
 // setup a friendly greeting for the root route
