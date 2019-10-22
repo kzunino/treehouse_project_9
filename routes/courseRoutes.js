@@ -133,6 +133,14 @@ router.put("/courses/:id", authenticateUser, [
     .withMessage('Please provide a value for "description"'),
 ], async (req, res, next) => {
   try {
+    const errors = validationResult(req);
+    // If there are validation errors...
+    if (!errors.isEmpty()) {
+    // Use the Array `map()` method to get a list of error messages.
+      const errorMessages = errors.array().map(error => error.msg);
+      // Return the validation errors to the client.
+      return res.status(400).json({ errors: errorMessages });
+    }
     const course = await Course.findByPk(req.params.id);
     if (course) {
       let { title, description, estimatedTime, materialsNeeded } = req.body;
@@ -146,7 +154,7 @@ router.put("/courses/:id", authenticateUser, [
               }
           }
          );
-        res.json(course).status(200).end();
+        res.status(200).end();
       } else {
         res.status(403).json({
           error: "Course not associated with user"
