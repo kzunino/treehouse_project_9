@@ -6,17 +6,6 @@ const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth');
 const router = express.Router();
 
-// router.get("/users", async (req, res, next) =>{
-//   try {
-//     const user = await User.findAll({
-//       order: [["id", "ASC"]]
-//     });
-//     res.json(user);
-//   } catch (error) {
-//     return next(error);
-//   }
-// })
-
 const authenticateUser = async (req, res, next) => {
   try {
   let message = null;
@@ -90,14 +79,16 @@ router.get('/users', authenticateUser, (req, res) => {
 // Route that creates a new user.
 router.post('/users',[
   check('firstName')
-    .exists()
+    .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "firstName"'),
   check('lastName')
-    .exists()
+    .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "lastName"'),
   check('emailAddress')
-    .exists()
-    .withMessage('Please provide a value for "emailAddress"'),
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "emailAddress"')
+    .isEmail()
+    .withMessage('Please provide a valid email address'),
   check('password')
     .exists()
     .withMessage('Please provide a value for "password"'),
@@ -130,8 +121,14 @@ router.post('/users',[
     // Set the status to 201 Created and end the response.
     res.status(201).location('/').end();
   } catch (error){
+    if(error.name === "SequelizeUniqueConstraintError"){
+      res.status(501).json({
+        error: "Email for user already exists"
+      })
+    }
     next(error)
   }
 });
+
 
 module.exports = router;

@@ -6,33 +6,7 @@ const { check, validationResult } = require('express-validator');
 const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth');
 
-
-router.get("/courses", async (req, res, next) => {
-  try {
-    const course = await Course.findAll({
-      order: [["id", "ASC"]]
-    });
-    res.json(course);
-  } catch (error) {
-    return next(error);
-  }
-});
-
-router.get("/courses/:id", async (req, res, next) => {
-  try {
-    const course = await Course.findByPk(req.params.id);
-    if (course){
-      res.json(course).status(200).end();
-    } else {
-      res.status(404).json({
-        message: 'Course Not Found',
-        });
-    }
-  } catch (error) {
-    return next(error);
-  }
-});
-
+// authentication middleware
 const authenticateUser = async (req, res, next) => {
   try {
   let message = null;
@@ -76,6 +50,40 @@ const authenticateUser = async (req, res, next) => {
  }
 };
 
+//Route to find all courses
+router.get("/courses", async (req, res, next) => {
+  try {
+    // const course = await Course.sequelize.query(
+    //   "SELECT id, userId, title, description, materialsNeeded, estimatedTime FROM Courses"
+    // );
+    const course = await Course.findAll({
+      attributes: [
+        'id', 'userId', 'title', 'description', 'materialsNeeded', 'estimatedTime'
+      ]
+    });
+    res.json(course);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+//returns a specific course
+router.get("/courses/:id", async (req, res, next) => {
+  try {
+    const course = await Course.findByPk(req.params.id);
+    if (course){
+      res.json(course).status(200).end();
+    } else {
+      res.status(404).json({
+        message: 'Course Not Found',
+        });
+    }
+  } catch (error) {
+    return next(error);
+  }
+});
+
+//Protected route to post a new course linked to authenitcated userId.
 router.post('/courses', authenticateUser, [
   check('title')
     .exists()
@@ -115,6 +123,7 @@ router.post('/courses', authenticateUser, [
   }
 });
 
+//Protected route that updates the course information.
 router.put("/courses/:id", authenticateUser, [
   check('title')
     .exists()
@@ -128,14 +137,38 @@ router.put("/courses/:id", authenticateUser, [
     if (course) {
       let { title, description, estimatedTime, materialsNeeded } = req.body;
       let userId = req.currentUser.id;
-      await Course.update(
-        { title, description, userId, estimatedTime, materialsNeeded },
-        { where: {
-          userId: userId
+      if(userId === course.userId){
+        await Course.update(
+          { title, description, userId, estimatedTime, materialsNeeded },
+          {
+            where: {
+              userId: userId
+              }
           }
-        }
-       );
-      res.json(course).status(200).end();
+         );
+        res.json(course).status(200).end();
+      } else {
+        res.status(403).json({
+          error: "Course not associated with user"
+        })
+      }
+    } else {
+      res.status(400).json({
+        message: 'Course Not Found',
+        });
+    }
+  } catch (error) {
+    return next(error);
+  }
+});
+
+//Protected route that deletes a course
+router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
+  try {
+    const course = await Course.findByPk(req.params.id);
+    if (course) {
+      await course.destroy()
+      res.status(204).end();
     } else {
       res.status(404).json({
         message: 'Course Not Found',
@@ -145,6 +178,7 @@ router.put("/courses/:id", authenticateUser, [
     return next(error);
   }
 });
+
 
 
 module.exports = router;
