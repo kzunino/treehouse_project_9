@@ -167,8 +167,15 @@ router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
   try {
     const course = await Course.findByPk(req.params.id);
     if (course) {
-      await course.destroy()
-      res.status(204).end();
+      let userId = req.currentUser.id;
+      if(userId === course.userId){
+        await course.destroy()
+        res.status(204).end();
+      } else {
+        res.status(403).json({
+          error: "Course not associated with user"
+        })
+      }
     } else {
       res.status(404).json({
         message: 'Course Not Found',
