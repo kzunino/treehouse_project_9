@@ -70,7 +70,11 @@ router.get("/courses", async (req, res, next) => {
 //returns a specific course
 router.get("/courses/:id", async (req, res, next) => {
   try {
-    const course = await Course.findByPk(req.params.id);
+    const course = await Course.findByPk(req.params.id, {
+      attributes: [
+        'id', 'userId', 'title', 'description', 'materialsNeeded', 'estimatedTime'
+      ]
+    });
     if (course){
       res.json(course).status(200).end();
     } else {
@@ -117,7 +121,7 @@ router.post('/courses', authenticateUser, [
     })
 
     // Set the status to 201 Created and end the response.
-    res.status(201).end();
+    res.status(201).location('/api/courses/' + newCourse.id).end();
   } catch (error){
     next(error)
   }
@@ -154,7 +158,7 @@ router.put("/courses/:id", authenticateUser, [
               }
           }
          );
-        res.status(200).end();
+        res.status(204).end();
       } else {
         res.status(403).json({
           error: "Course not associated with user"
