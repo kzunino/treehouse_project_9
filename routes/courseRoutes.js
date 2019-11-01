@@ -76,6 +76,11 @@ router.get("/courses/:id", async (req, res, next) => {
       ]
     });
     if (course){
+      let id = course.userId;
+      const user = await User.findByPk(id)
+        if (user){
+          course.userId = user.firstName + " " + user.lastName;
+        }
       res.json(course).status(200).end();
     } else {
       res.status(404).json({
